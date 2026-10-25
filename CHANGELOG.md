@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-25
+
 ### Added
 
 - PeerTube in Gladys: a device for the instance (online, local videos, views of
@@ -24,3 +26,6 @@ the notes of the version's GitHub Release.
   announcement, and the details), for all channels or one.
 - A dashboard widget: lives on air, unread notifications, and the latest
   videos as a poster grid with their thumbnails.
+
+[Unreleased]: https://github.com/guim31/gladys-peertube/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-peertube/releases/tag/v1.0.0
