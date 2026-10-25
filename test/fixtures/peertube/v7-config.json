@@ -1,0 +1,32 @@
+{
+  "instance": {
+    "name": "PeerTube",
+    "shortDescription": "PeerTube, an ActivityPub-federated video streaming platform using P2P directly in your web browser.",
+    "isNSFW": false,
+    "defaultNSFWPolicy": "do_not_list"
+  },
+  "serverVersion": "7.3.0",
+  "serverCommit": "",
+  "live": {
+    "enabled": true,
+    "allowReplay": true,
+    "latencySetting": {
+      "enabled": true
+    },
+    "maxDuration": -1,
+    "maxInstanceLives": 20,
+    "maxUserLives": 3,
+    "transcoding": {
+      "enabled": true,
+      "remoteRunners": {
+        "enabled": false
+      },
+      "enabledResolutions": [],
+      "profile": "default",
+      "availableProfiles": ["default"]
+    },
+    "rtmp": {
+      "port": 1935
+    }
+  }
+}

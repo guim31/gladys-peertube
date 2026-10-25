@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-peertube",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "PeerTube in Gladys Assistant: new videos and lives of your channels, instance figures, notifications.",
   "type": "module",
   "main": "index.js",
   "scripts": {

@@ -1,0 +1,99 @@
+{
+  "url": "https://framatube.org/video-channels/joinpeertube",
+  "name": "joinpeertube",
+  "host": "framatube.org",
+  "avatars": [
+    {
+      "height": 1500,
+      "width": 1500,
+      "path": "/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+      "fileUrl": "https://framatube.org/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+      "createdAt": "2026-03-11T12:36:29.341Z",
+      "updatedAt": "2026-03-11T12:36:29.341Z"
+    },
+    {
+      "height": 600,
+      "width": 600,
+      "path": "/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+      "fileUrl": "https://framatube.org/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+      "createdAt": "2026-03-11T12:36:29.360Z",
+      "updatedAt": "2026-03-11T12:36:29.360Z"
+    },
+    {
+      "height": 120,
+      "width": 120,
+      "path": "/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+      "fileUrl": "https://framatube.org/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+      "createdAt": "2026-03-11T12:36:29.408Z",
+      "updatedAt": "2026-03-11T12:36:29.408Z"
+    },
+    {
+      "height": 48,
+      "width": 48,
+      "path": "/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+      "fileUrl": "https://framatube.org/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+      "createdAt": "2026-03-11T12:36:29.464Z",
+      "updatedAt": "2026-03-11T12:36:29.464Z"
+    }
+  ],
+  "id": 2215,
+  "hostRedundancyAllowed": false,
+  "followingCount": 0,
+  "followersCount": 308,
+  "createdAt": "2021-08-09T14:26:09.514Z",
+  "banners": [],
+  "displayName": "A propos de PeerTube",
+  "description": "Un logiciel libre pour reprendre le contrôle de vos vidéos",
+  "support": null,
+  "publicEmail": null,
+  "isLocal": true,
+  "updatedAt": "2021-12-13T14:01:49.636Z",
+  "ownerAccount": {
+    "url": "https://framatube.org/accounts/framasoft",
+    "name": "framasoft",
+    "host": "framatube.org",
+    "avatars": [
+      {
+        "height": 1500,
+        "width": 1500,
+        "path": "/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+        "fileUrl": "https://framatube.org/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+        "createdAt": "2026-03-11T12:30:47.185Z",
+        "updatedAt": "2026-03-11T12:30:47.185Z"
+      },
+      {
+        "height": 600,
+        "width": 600,
+        "path": "/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+        "fileUrl": "https://framatube.org/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+        "createdAt": "2026-03-11T12:30:47.231Z",
+        "updatedAt": "2026-03-11T12:30:47.231Z"
+      },
+      {
+        "height": 120,
+        "width": 120,
+        "path": "/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+        "fileUrl": "https://framatube.org/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+        "createdAt": "2026-03-11T12:30:47.282Z",
+        "updatedAt": "2026-03-11T12:30:47.282Z"
+      },
+      {
+        "height": 48,
+        "width": 48,
+        "path": "/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+        "fileUrl": "https://framatube.org/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+        "createdAt": "2026-03-11T12:30:47.603Z",
+        "updatedAt": "2026-03-11T12:30:47.603Z"
+      }
+    ],
+    "id": 3,
+    "hostRedundancyAllowed": false,
+    "followingCount": 0,
+    "followersCount": 1051,
+    "createdAt": "2018-03-01T15:16:17.118Z",
+    "displayName": "Framasoft",
+    "description": null,
+    "updatedAt": "2019-03-27T11:05:26.944Z",
+    "userId": 2
+  }
+}

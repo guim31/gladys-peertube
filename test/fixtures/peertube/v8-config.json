@@ -1,0 +1,35 @@
+{
+  "instance": {
+    "name": "Framatube",
+    "shortDescription": "PeerTube platform dedicated to Framasoft's videos.",
+    "isNSFW": false,
+    "defaultNSFWPolicy": "do_not_list"
+  },
+  "serverVersion": "8.3.1",
+  "serverCommit": "",
+  "live": {
+    "enabled": true,
+    "allowReplay": false,
+    "dvr": {
+      "maxWindow": 3600
+    },
+    "latencySetting": {
+      "enabled": true
+    },
+    "maxDuration": -1,
+    "maxInstanceLives": -1,
+    "maxUserLives": -1,
+    "transcoding": {
+      "enabled": true,
+      "remoteRunners": {
+        "enabled": true
+      },
+      "enabledResolutions": [720],
+      "profile": "default",
+      "availableProfiles": ["default"]
+    },
+    "rtmp": {
+      "port": 1935
+    }
+  }
+}
