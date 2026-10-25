@@ -30,6 +30,17 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+The integration stores under `/data` only the address of the instance read
+last and, per channel followed, its name, its counts, the ids of the videos
+already seen, the lives on air and the titles, dates, addresses and thumbnail
+paths of its latest videos: all public data. The user name and password of the
+account stay in the configuration of Gladys: the password is sent to the
+configured instance only, in the body of its token request (prefer HTTPS for a
+public instance), and never written to the logs nor to `/data`. The access and
+refresh tokens stay in memory. The integration only reads the REST API of the
+instance configured (GET requests, plus the token requests), and the
+thumbnails it shows in the widget; no inbound port, no other service.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+and PeerTube itself.

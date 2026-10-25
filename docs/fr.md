@@ -1,67 +1,164 @@
-# Template de démonstration
+# PeerTube
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+[PeerTube](https://joinpeertube.org/) est la plateforme vidéo libre et fédérée
+développée par Framasoft. Cette intégration suit une instance (la vôtre, ou
+n'importe quelle instance publique) et les chaînes de votre choix dans Gladys :
+les nouvelles vidéos, les directs en cours, les chiffres de l'instance et, avec
+votre compte, vos notifications non lues. Elle ne fait que lire : elle ne
+publie, ne commente et ne modifie jamais rien sur PeerTube.
 
-## Ce que vous obtenez
+Testée pour de vrai contre PeerTube 7.3.0 (en Docker, avec un compte, une
+chaîne, des envois de vidéos et un direct RTMP) et contre framatube.org
+(PeerTube 8.3.1).
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+## Ce qu'il faut
+
+- Gladys Assistant 5.1.0 ou plus récent.
+- L'adresse d'une instance PeerTube : la vôtre sur votre réseau
+  (`http://192.168.1.20:9000`), ou une instance publique
+  (`https://framatube.org`).
+- Les identifiants des chaînes à suivre. L'identifiant est la fin de l'adresse
+  de la page de la chaîne : `https://framatube.org/c/joinpeertube` donne
+  `joinpeertube`. Une chaîne d'une autre instance s'écrit `nom@hôte`
+  (`blender_channel@video.blender.org`) : l'instance configurée doit la
+  connaître (fédération), ce qui est toujours le cas d'une chaîne qu'elle suit
+  ou que l'un de ses utilisateurs suit.
+- Facultatif : l'identifiant et le mot de passe de votre compte sur cette
+  instance.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+1. Dans Gladys, ouvrez **Intégrations**, installez **PeerTube**, puis ouvrez
+   son onglet **Configuration**.
+2. **Adresse de l'instance** : l'adresse du site PeerTube, comme dans votre
+   navigateur. Une adresse nue est comprise : `framatube.org` (HTTPS),
+   `192.168.1.20:9000` (HTTP sur votre réseau).
+3. **Chaînes à suivre** : les identifiants, séparés par des virgules (20 au
+   plus). L'adresse de la page d'une chaîne est acceptée aussi.
+4. **Compte (facultatif)** : votre **Identifiant** et votre **Mot de passe**.
+   Laissez-les vides pour ne lire que les pages publiques.
+5. **Intervalle de rafraîchissement** : 1, 2 (par défaut), 5 ou 10 minutes.
+   Chaque lecture fait deux requêtes légères par chaîne, et une ou deux pour le
+   compte. Un direct est vu au plus avec ce retard.
+6. **Langue des noms** : la langue des noms des fonctionnalités (fixés à l'ajout
+   d'un appareil), des dates et de la phrase de l'action de scène.
+7. Enregistrez, puis utilisez **Tester la connexion** : la réponse donne le nom
+   et la version de l'instance, les chaînes trouvées et le compte.
+8. Ouvrez l'onglet **Découverte** et ajoutez les appareils voulus.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+## Les appareils
 
-## Actions
+Tous les appareils sont en lecture seule. Gladys ne les interroge jamais :
+l'intégration lit PeerTube avec son propre minuteur, à l'intervalle choisi.
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+### L'instance
 
-## Scènes
+**PeerTube** suivi du nom de l'instance :
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+- **En ligne** : l'instance répond.
+- **Vidéos locales** : les vidéos publiées sur l'instance elle-même.
+- **Vues des vidéos locales** : leurs vues, toutes ensemble.
+- **Utilisateurs** : les comptes de l'instance.
+- **Instances suivies** : les autres instances qu'elle suit.
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+PeerTube recalcule ces chiffres toutes les quelques minutes : ils avancent par
+paliers.
+
+### Les chaînes
+
+Un appareil par chaîne, nommé comme la chaîne :
+
+- **Direct en cours** : la chaîne est en direct en ce moment.
+- **Spectateurs du direct** : les spectateurs de son direct (0 sans direct).
+- **Dernière vidéo** : le titre de sa dernière vidéo.
+- **Dernière vidéo publiée le** : sa date et son heure.
+- **Abonnés** : les abonnés de la chaîne.
+- **Vidéos** : ses vidéos (hors directs en cours).
+
+### Le compte
+
+Avec un compte, **PeerTube** suivi de votre identifiant (`nom@hôte`) :
+
+- **Notifications non lues** : ce qu'affiche la cloche de PeerTube (nouveaux
+  commentaires, nouveaux abonnés, vidéos de vos abonnements, etc.).
+- **Abonnés** : les abonnés de toutes vos chaînes ensemble.
 
 ## Tableau de bord
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+Le widget **Vidéos PeerTube** affiche, de haut en bas : vos notifications non
+lues (avec un compte), une ligne par direct en cours (chaîne, titre,
+spectateurs), puis les six dernières vidéos des chaînes suivies en grille
+d'affiches (miniature, titre, chaîne, date). Touchez une vidéo pour ouvrir son
+détail ; sur une instance en HTTPS, un lien **Regarder** l'ouvre sur PeerTube.
+Les miniatures sont servies par l'intégration : votre navigateur ne charge
+jamais rien depuis l'instance.
+
+## Scènes
+
+### Déclencheurs
+
+- **Nouvelle vidéo PeerTube** : une chaîne suivie a publié une nouvelle vidéo.
+  Filtre : la chaîne (vide : n'importe laquelle). Variables : la chaîne, son
+  identifiant, le titre, l'adresse de la vidéo, sa durée (minutes) et sa date
+  de publication.
+- **Direct PeerTube commencé** : une chaîne suivie est en direct. Filtre : la
+  chaîne. Variables : la chaîne, son identifiant, le titre et l'adresse du
+  direct.
+- **Direct PeerTube terminé** : un direct d'une chaîne suivie est fini. Filtre :
+  la chaîne. Variables : la chaîne, son identifiant, le titre, l'adresse, la
+  durée (minutes, comptée depuis la première lecture qui l'a vu) et le pic de
+  spectateurs.
+
+Rien n'est annoncé pour ce qui existait déjà : la première lecture d'une chaîne
+apprend seulement ses vidéos, et ce qui a été vu est gardé d'un redémarrage à
+l'autre.
+
+### Actions
+
+- **Lire les dernières vidéos PeerTube** : lit PeerTube maintenant et donne une
+  phrase pour un message ou une annonce vocale (« PeerTube : en direct : … ;
+  dernières vidéos : … »), pour toutes les chaînes ou pour une seule, avec 1, 3
+  ou 5 vidéos citées. Sorties : la phrase, si un direct est en cours, le titre
+  du direct, le titre, la chaîne et l'adresse de la dernière vidéo.
+
+### Idées de scènes
+
+- **Nouvelle vidéo PeerTube** sur votre chaîne préférée → envoyez-vous un
+  message avec `{{triggerEvent.data.title}}` et `{{triggerEvent.data.url}}`.
+- **Direct PeerTube commencé** → baissez les lumières du salon et annoncez « Le
+  direct de {{triggerEvent.data.channel_name}} a commencé » sur l'enceinte.
+- Chaque soir à 19 h → **Lire les dernières vidéos PeerTube**, puis envoyez la
+  phrase par message.
+- **Notifications non lues** supérieur à 0 → passez une lampe en bleu.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- **PeerTube ne répond pas** : vérifiez l'adresse et le port (9000 pour une
+  installation Docker simple, aucun derrière un proxy inverse). Le conteneur de
+  l'intégration doit joindre cette adresse.
+- **Aucun PeerTube à cette adresse** : l'adresse est celle du site, pas d'une
+  page intégrée ni d'un stockage objet.
+- **Chaîne … introuvable** : vérifiez l'identifiant sur la page de la chaîne.
+  Une chaîne distante doit être connue de l'instance : ouvrez sa page une fois
+  depuis l'instance (recherche `nom@hôte`), ou abonnez-vous-y.
+- **L'instance limite les requêtes** : choisissez un intervalle plus long ou
+  moins de chaînes. Les instances publiques limitent l'API par adresse.
+- **Connexion refusée** : vérifiez l'identifiant et le mot de passe dans
+  l'interface web de la même instance. Les comptes à double authentification,
+  et les connexions par OpenID Connect ou SAML, ne sont pas pris en charge :
+  laissez le compte vide et utilisez la partie publique.
+- Pour tout le reste, réglez `LOG_LEVEL=debug` et ouvrez un ticket :
+  https://github.com/guim31/gladys-peertube/issues
+
+## Limites
+
+- Lecture seule : ni envoi, ni commentaire, ni abonnement depuis Gladys.
+- Un direct est vu à la lecture suivante, et sa durée part de là. Un direct qui
+  s'arrête et reprend entre deux lectures n'est pas vu comme terminé.
+- 5 nouvelles vidéos d'une chaîne au plus sont annoncées par lecture (les plus
+  récentes) : un plus gros lot publié d'un coup est compté, pas tout annoncé.
+- La miniature et le lien d'une vidéo viennent de l'instance configurée : une
+  chaîne distante apparaît comme cette instance la connaît.
+- Pas de webhook : le bac à sable de Gladys n'a pas de port entrant, PeerTube
+  est donc lu périodiquement.
+- Sans lien avec Framasoft ni avec le projet PeerTube.

@@ -1,169 +1,213 @@
 // -----------------------------------------------------------------------------
-// Dashboard widgets (SDK v0.14+, Gladys 5.1+).
+// Dashboard widget (manifest `widgets`, Gladys 5.1+): `latest_videos`.
 //
-// A widget puts the integration's own data on the Gladys dashboard without a
-// dedicated core widget. The manifest `widgets` field declares its identity
-// (key, label, icon, optional per-instance `settings`); at runtime the
-// integration returns a DECLARATIVE content — `text`, `value`, `gauge`,
-// `status`, `chart`, `card-list`, `image`, `button` — that the core renders
-// with its own theme, dark mode and translations. No HTML, no CSS.
+// The use case: what the followed channels published, at a glance on the wall
+// tablet. The lives on air first (one status row per live, with its viewers),
+// the unread notifications of the account when there is one, then the latest
+// videos as a poster grid (thumbnail, title, channel, date; a tap opens the
+// detail panel with a link to the video when the instance is in HTTPS). Read
+// only: no button.
 //
-// Each entry of WIDGETS is keyed by the widget `key` and exposes:
-//   - get(gladys, { settings, language, units, config }): the content,
-//     registered by index.js with `gladys.onWidgetGet(key, ...)`;
-//   - action(gladys, { actionKey, params, settings, config }) (optional): a
-//     tapped `button` carrying an `action`, registered with
-//     `gladys.onWidgetAction`.
-//
-// Check your contents in the tests with `validateWidgetContent` (exported by
-// the SDK, see test/widgets.test.js), or run with DEBUG=gladys-integration-sdk
-// to have the SDK log every violation of the vocabulary and the budget.
+// The thumbnails are served by the integration (`onWidgetGetImage`): the
+// browser never loads a third-party address. Their key derives from their
+// path, which changes with the image, so the one-hour cache of the core is
+// right.
 // -----------------------------------------------------------------------------
 
-import {
-  createLogger,
-  DEVICE_FEATURE_CATEGORIES,
-  DEVICE_TRANSPORTS,
-  WIDGET_COLORS,
-} from '@gladysassistant/integration-sdk';
-import { identifyDevice } from './devices/index.js';
-import { weatherStation } from './devices/weatherStation.js';
-import { plug } from './devices/plug.js';
-import { light } from './devices/light.js';
+import { createHash } from 'node:crypto';
+import { WIDGET_COLORS } from '@gladysassistant/integration-sdk';
+import { ERROR_KINDS, WIDGET_KEY, formatDate } from './hub.js';
+import { ERROR_TEXT, pick } from './texts.js';
 
-const logger = createLogger({ name: 'widgets' });
+// Posters of the grid (the core accepts 12; 6 stay readable on a tablet).
+const GRID_SIZE = 6;
+// The core refuses an image over 300 KB decoded.
+const MAX_IMAGE_BYTES = 300 * 1024;
+// Thumbnails kept in memory (bytes), the oldest dropped first.
+const IMAGE_CACHE_SIZE = 24;
 
-// Widget key, as declared in the manifest `widgets` field.
-export const DEMO_STATUS_WIDGET = 'demo_status';
-
-// Keys of the `button` actions the demo_status content declares.
-const DEMO_STATUS_ACTIONS = { IDENTIFY_LIGHT: 'identify_light' };
-
-// How the plug transport reads in the status list.
-const TRANSPORT_STATUS = {
-  [DEVICE_TRANSPORTS.LOCAL]: { value: { en: 'Local', fr: 'Locale' }, color: WIDGET_COLORS.SUCCESS },
-  [DEVICE_TRANSPORTS.CLOUD]: { value: { en: 'Cloud', fr: 'Cloud' }, color: WIDGET_COLORS.INFO },
-  [DEVICE_TRANSPORTS.UNREACHABLE]: {
-    value: { en: 'Unreachable', fr: 'Injoignable' },
-    color: WIDGET_COLORS.DANGER,
+export const TEXT = {
+  pick: {
+    en: 'Enter the address of a PeerTube instance in the configuration of the integration.',
+    fr: "Saisissez l'adresse d'une instance PeerTube dans la configuration de l'intégration.",
+    de: 'Gib die Adresse einer PeerTube-Instanz in der Konfiguration der Integration ein.',
+    es: 'Introduzca la dirección de una instancia PeerTube en la configuración de la integración.',
   },
+  waiting: {
+    en: 'Waiting for the first reading of PeerTube…',
+    fr: 'En attente de la première lecture de PeerTube…',
+    de: 'Warte auf die erste Abfrage von PeerTube…',
+    es: 'Esperando la primera lectura de PeerTube…',
+  },
+  noChannel: {
+    en: 'Add the channels to follow in the configuration of the integration.',
+    fr: "Ajoutez les chaînes à suivre dans la configuration de l'intégration.",
+    de: 'Füge die zu folgenden Kanäle in der Konfiguration der Integration hinzu.',
+    es: 'Añada los canales que desea seguir en la configuración de la integración.',
+  },
+  none: {
+    en: 'No video yet on the followed channels.',
+    fr: 'Aucune vidéo pour le moment sur les chaînes suivies.',
+    de: 'Noch kein Video auf den gefolgten Kanälen.',
+    es: 'Todavía no hay vídeos en los canales seguidos.',
+  },
+  live: { en: 'Live', fr: 'En direct', de: 'Live', es: 'En directo' },
+  viewers: {
+    en: (count) => `Live · ${count} viewer${count === 1 ? '' : 's'}`,
+    fr: (count) => `En direct · ${count} spectateur${count > 1 ? 's' : ''}`,
+    de: (count) => `Live · ${count} Zuschauer`,
+    es: (count) => `En directo · ${count} espectador${count === 1 ? '' : 'es'}`,
+  },
+  unread: {
+    en: 'Notifications',
+    fr: 'Notifications',
+    de: 'Benachrichtigungen',
+    es: 'Notificaciones',
+  },
+  watch: { en: 'Watch', fr: 'Regarder', de: 'Ansehen', es: 'Ver' },
+  offline: { en: 'Offline', fr: 'Hors ligne', de: 'Offline', es: 'Sin conexión' },
+  problem: { en: 'Error', fr: 'Erreur', de: 'Fehler', es: 'Error' },
 };
 
-// A live tile references a feature by its external_id: read it from the
-// discovery payload itself, so the widget and the device never disagree.
-function featureExternalId(gladys, config, blueprint, category) {
-  const device = blueprint.buildDevice(gladys, config);
-  return device.features.find((feature) => feature.category === category).external_id;
+const t = (text, language) => pick(text, language);
+const fit = (text, max) => (text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text);
+
+function message(text, language) {
+  return {
+    ttl_seconds: 300,
+    components: [{ type: 'text', variant: 'body', text: fit(t(text, language), 300) }],
+  };
 }
 
-function plugConnectionStatus(gladys, config) {
-  const { transport, degraded } = plug.transport(gladys, config);
-  const { value, color } = TRANSPORT_STATUS[transport];
-  if (degraded) {
+/** The key of a thumbnail: stable for one path, new when the image changes. */
+export const imageKey = (path) =>
+  `thumb-${createHash('sha256').update(path).digest('hex').slice(0, 24)}`;
+
+/** The thumbnails a content refers to, by key (filled by `get`). */
+const imagePaths = new Map();
+/** Their bytes, read once from the instance. */
+const imageCache = new Map();
+
+/** One poster of the grid. */
+export function videoItem(video, language) {
+  // In a grid the core shows a `date` in place of the subtitle: the channel
+  // stays as subtitle, the date goes to the detail panel.
+  const item = { title: fit(video.title || '…', 60), subtitle: fit(video.channel || '', 60) };
+  const date = formatDate(video.publishedAt, language);
+  item.description = [video.channel, date].filter(Boolean).join(' · ') || video.title || '…';
+  if (video.thumbnailPath) {
+    item.image = imageKey(video.thumbnailPath);
+    imagePaths.set(item.image, video.thumbnailPath);
+  }
+  // The core keeps https links only.
+  if (/^https:\/\//.test(video.url ?? '')) {
+    item.links = [{ url: video.url, label: t(TEXT.watch, language) }];
+  }
+  if (!item.subtitle) {
+    delete item.subtitle;
+  }
+  return item;
+}
+
+async function get(hub, { language = 'en' } = {}) {
+  if (!hub.client) {
+    return message(TEXT.pick, language);
+  }
+  if (hub.error) {
+    const unreachable = hub.error.kind === ERROR_KINDS.UNREACHABLE;
     return {
-      value: { en: `${value.en} (degraded mode)`, fr: `${value.fr} (mode dégradé)` },
-      color: WIDGET_COLORS.WARNING,
+      ttl_seconds: 120,
+      components: [
+        {
+          type: 'status',
+          items: [
+            {
+              label: 'PeerTube',
+              icon: 'alert-triangle',
+              value: fit(t(unreachable ? TEXT.offline : TEXT.problem, language), 40),
+              color: WIDGET_COLORS.DANGER,
+            },
+          ],
+        },
+        { type: 'text', variant: 'body', text: fit(t(ERROR_TEXT[hub.error.kind], language), 300) },
+      ],
     };
   }
-  return { value, color };
+  if (!hub.instance.reachable) {
+    return message(TEXT.waiting, language);
+  }
+  if (hub.config.channels.length === 0 && !hub.client.hasAccount) {
+    return message(TEXT.noChannel, language);
+  }
+  const components = [];
+  if (hub.client.hasAccount && hub.account.unread !== null) {
+    components.push({
+      type: 'value',
+      value: hub.account.unread,
+      label: t(TEXT.unread, language),
+      icon: 'bell',
+      color: hub.account.unread ? WIDGET_COLORS.INFO : WIDGET_COLORS.NEUTRAL,
+    });
+  }
+  const lives = hub.lives().slice(0, 10);
+  if (lives.length) {
+    const viewers = pick(TEXT.viewers, language);
+    components.push({
+      type: 'status',
+      items: lives.map((live) => ({
+        label: fit(`${live.channel} · ${live.title}`, 40),
+        icon: 'radio',
+        value: fit(viewers(live.viewers), 40),
+        color: WIDGET_COLORS.DANGER,
+      })),
+    });
+  }
+  const videos = hub.recent().slice(0, GRID_SIZE);
+  components.push(
+    videos.length
+      ? {
+          type: 'card-list',
+          display: 'grid',
+          items: videos.map((video) => videoItem(video, language)),
+        }
+      : { type: 'text', variant: 'body', text: t(TEXT.none, language) },
+  );
+  return { ttl_seconds: 300, components };
+}
+
+async function action(hub, { actionKey }) {
+  // No button: nothing to run.
+  throw new Error(`Unknown action ${actionKey}`);
+}
+
+/** `onWidgetGetImage`: the raw base64 of a thumbnail of the grid. */
+export async function getImage(hub, key) {
+  if (imageCache.has(key)) {
+    return imageCache.get(key);
+  }
+  // After a restart, the core may still show a content of the previous run.
+  const path =
+    imagePaths.get(key) ??
+    hub.recent().find((video) => video.thumbnailPath && imageKey(video.thumbnailPath) === key)
+      ?.thumbnailPath;
+  if (!path || !hub.client) {
+    throw new Error(`Unknown image ${key}`);
+  }
+  const bytes = await hub.client.image(path);
+  if (bytes.length === 0 || bytes.length > MAX_IMAGE_BYTES) {
+    throw new Error(`Image ${key}: ${bytes.length} bytes`);
+  }
+  const base64 = bytes.toString('base64');
+  imageCache.set(key, base64);
+  while (imageCache.size > IMAGE_CACHE_SIZE) {
+    imageCache.delete(imageCache.keys().next().value);
+  }
+  while (imagePaths.size > 4 * IMAGE_CACHE_SIZE) {
+    imagePaths.delete(imagePaths.keys().next().value);
+  }
+  return base64;
 }
 
 export const WIDGETS = {
-  [DEMO_STATUS_WIDGET]: {
-    // `settings` holds the per-instance values of the declared `settings`
-    // (none here); `language` and `units` are those of the user viewing the
-    // dashboard, for the values you format yourself. Multi-language objects
-    // (`{ en, fr }`) are picked by the core, like everywhere else.
-    async get(gladys, { config }) {
-      logger.debug(`onWidgetGet <- ${DEMO_STATUS_WIDGET}`);
-      return {
-        // Reload policy: the computed parts below only change with the
-        // config, and index.js nudges the widget on every (re)connection and
-        // config update (see refreshWidgets) — the TTL is just a safety net.
-        ttl_seconds: 300,
-        components: [
-          // Device-bound tiles: LIVE, they follow the published states over
-          // the core's real-time path. No TTL, no nudge involved.
-          {
-            type: 'value',
-            label: { en: 'Temperature', fr: 'Température' },
-            icon: 'thermometer',
-            device_feature: featureExternalId(
-              gladys,
-              config,
-              weatherStation,
-              DEVICE_FEATURE_CATEGORIES.TEMPERATURE_SENSOR,
-            ),
-          },
-          {
-            type: 'value',
-            label: { en: 'Office plug', fr: 'Prise du bureau' },
-            icon: 'zap',
-            device_feature: featureExternalId(
-              gladys,
-              config,
-              plug,
-              DEVICE_FEATURE_CATEGORIES.ENERGY_SENSOR,
-            ),
-          },
-          // Computed rows: what the integration knows that no device feature
-          // carries. Served from the core cache until the TTL or a nudge.
-          {
-            type: 'status',
-            items: [
-              {
-                label: { en: 'Plug connection', fr: 'Connexion de la prise' },
-                icon: 'wifi',
-                ...plugConnectionStatus(gladys, config),
-              },
-              {
-                label: { en: 'Observed location', fr: 'Position observée' },
-                icon: 'map-pin',
-                value: `${config.latitude.toFixed(2)}, ${config.longitude.toFixed(2)}`,
-                color: WIDGET_COLORS.NEUTRAL,
-              },
-            ],
-          },
-          // `params` are declared HERE and sent back as-is: the handler never
-          // receives user input (a dashboard can hang on a public wall).
-          {
-            type: 'button',
-            label: { en: 'Identify the light', fr: 'Identifier la lampe' },
-            icon: 'eye',
-            style: 'secondary',
-            action: {
-              key: DEMO_STATUS_ACTIONS.IDENTIFY_LIGHT,
-              params: { device: light.deviceExternalId(gladys) },
-            },
-          },
-        ],
-      };
-    },
-
-    // Resolve an optional toast (string or multi-language object, ≤ 200
-    // characters). After a successful action the core drops the cached
-    // content and every open dashboard refetches it: no nudge needed.
-    async action(gladys, { actionKey, params, config }) {
-      logger.info(`onWidgetAction <- ${DEMO_STATUS_WIDGET}.${actionKey}`);
-      if (actionKey === DEMO_STATUS_ACTIONS.IDENTIFY_LIGHT) {
-        return identifyDevice(gladys, params.device, config);
-      }
-      // Throwing acks the action as failed: the message reaches the user.
-      throw new Error(`Unknown widget action: ${actionKey}`);
-    },
-  },
+  [WIDGET_KEY]: { get, action },
 };
-
-/**
- * Freshness nudge: ask the core to re-pull every widget NOW instead of
- * waiting for the content TTL. Call it when you KNOW a computed content
- * changed (here: the config, which drives the plug transport and the observed
- * location) — and after every (re)connection, since the nudges are
- * fire-and-forget: rate-limited core-side to 1 per 10 s per widget, dropped
- * silently while disconnected.
- */
-export function refreshWidgets(gladys) {
-  for (const key of Object.keys(WIDGETS)) {
-    gladys.requestWidgetRefresh(key);
-  }
-}

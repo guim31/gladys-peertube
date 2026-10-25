@@ -1,0 +1,458 @@
+{
+  "total": 15,
+  "data": [
+    {
+      "id": 33785,
+      "uuid": "4294a720-f263-4ea4-9392-cf9cea4d5277",
+      "shortUUID": "9dRFC6Ya11NCVeYKn8ZhiD",
+      "url": "https://framatube.org/videos/watch/4294a720-f263-4ea4-9392-cf9cea4d5277",
+      "name": "What is the Fediverse?",
+      "category": {
+        "id": 15,
+        "label": "Science & Technology"
+      },
+      "licence": {
+        "id": 2,
+        "label": "Attribution - Share Alike"
+      },
+      "language": {
+        "id": "en",
+        "label": "English"
+      },
+      "privacy": {
+        "id": 1,
+        "label": "Public"
+      },
+      "nsfw": false,
+      "nsfwFlags": 0,
+      "nsfwSummary": null,
+      "truncatedDescription": "Help us translate the subtitles [on our translation tool](https://weblate.framasoft.org/projects/what-is-the-fediverse-v",
+      "description": "Help us translate the subtitles [on our translation tool](https://weblate.framasoft.org/projects/what-is-the-fediverse-v",
+      "isLocal": true,
+      "duration": 98,
+      "aspectRatio": null,
+      "views": 32953,
+      "viewers": 1,
+      "downloads": 5345,
+      "likes": 79,
+      "dislikes": 0,
+      "thumbnailPath": "/lazy-static/thumbnails/21fb9264-edbe-46e8-8e37-605bc535c350.jpg",
+      "previewPath": "/lazy-static/thumbnails/8b8fb900-bf3c-42ee-a8da-08d7632bf918.jpg",
+      "thumbnails": [
+        {
+          "height": 1080,
+          "width": 1920,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/8b8fb900-bf3c-42ee-a8da-08d7632bf918.jpg"
+        },
+        {
+          "height": 1400,
+          "width": 1400,
+          "aspectRatio": "1:1",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/0ecae3c5-2eee-4991-a6ae-e66a08d7fe49.jpg"
+        },
+        {
+          "height": 720,
+          "width": 1280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/a4006af2-3f01-4728-b21e-4735fc687c61.jpg"
+        },
+        {
+          "height": 480,
+          "width": 850,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/9f8c31f7-2d3f-406f-b9cf-2dab96f5d17c.jpg"
+        },
+        {
+          "height": 157,
+          "width": 280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/21fb9264-edbe-46e8-8e37-605bc535c350.jpg"
+        }
+      ],
+      "embedPath": "/videos/embed/9dRFC6Ya11NCVeYKn8ZhiD",
+      "createdAt": "2021-12-13T14:01:49.493Z",
+      "updatedAt": "2026-10-25T00:40:22.625Z",
+      "publishedAt": "2022-04-28T11:51:16.293Z",
+      "originallyPublishedAt": null,
+      "isLive": false,
+      "account": {
+        "id": 3,
+        "displayName": "Framasoft",
+        "name": "framasoft",
+        "url": "https://framatube.org/accounts/framasoft",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "createdAt": "2026-03-11T12:30:47.185Z",
+            "updatedAt": "2026-03-11T12:30:47.185Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "createdAt": "2026-03-11T12:30:47.231Z",
+            "updatedAt": "2026-03-11T12:30:47.231Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "createdAt": "2026-03-11T12:30:47.282Z",
+            "updatedAt": "2026-03-11T12:30:47.282Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "createdAt": "2026-03-11T12:30:47.603Z",
+            "updatedAt": "2026-03-11T12:30:47.603Z"
+          }
+        ]
+      },
+      "channel": {
+        "id": 2215,
+        "name": "joinpeertube",
+        "displayName": "A propos de PeerTube",
+        "url": "https://framatube.org/video-channels/joinpeertube",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "createdAt": "2026-03-11T12:36:29.341Z",
+            "updatedAt": "2026-03-11T12:36:29.341Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "createdAt": "2026-03-11T12:36:29.360Z",
+            "updatedAt": "2026-03-11T12:36:29.360Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "createdAt": "2026-03-11T12:36:29.408Z",
+            "updatedAt": "2026-03-11T12:36:29.408Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "createdAt": "2026-03-11T12:36:29.464Z",
+            "updatedAt": "2026-03-11T12:36:29.464Z"
+          }
+        ]
+      },
+      "comments": 15
+    },
+    {
+      "id": 28926,
+      "uuid": "d2e9e7a4-b331-4bad-bfee-a0c803e64011",
+      "shortUUID": "s3zLHRFn76KcDmuTsoDUXB",
+      "url": "https://framatube.org/videos/watch/d2e9e7a4-b331-4bad-bfee-a0c803e64011",
+      "name": "PeerTube, une application web de vidéo fédérée utilisant le P2P / présentation par Chocobozzz (JDLL 2018)",
+      "category": {
+        "id": 15,
+        "label": "Science & Technology"
+      },
+      "licence": {
+        "id": 7,
+        "label": "Public Domain Dedication"
+      },
+      "language": {
+        "id": "fr",
+        "label": "French"
+      },
+      "privacy": {
+        "id": 1,
+        "label": "Public"
+      },
+      "nsfw": false,
+      "nsfwFlags": 0,
+      "nsfwSummary": null,
+      "truncatedDescription": "Présentation de PeerTube, une application web de vidéo fédérée via ActivityPub et utilisant le P2P via WebTorrent\r\n\r\nIl ",
+      "description": "Présentation de PeerTube, une application web de vidéo fédérée via ActivityPub et utilisant le P2P via WebTorrent\r\n\r\nIl ",
+      "isLocal": true,
+      "duration": 3391,
+      "aspectRatio": null,
+      "views": 380,
+      "viewers": 0,
+      "downloads": 5302,
+      "likes": 1,
+      "dislikes": 0,
+      "thumbnailPath": "/lazy-static/thumbnails/73a30256-e91b-47bb-8bc7-f8065c9da78c.jpg",
+      "previewPath": "/lazy-static/thumbnails/b14701c7-5889-495d-b5e7-066c6ac1cfcc.jpg",
+      "thumbnails": [
+        {
+          "height": 1080,
+          "width": 1920,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/b14701c7-5889-495d-b5e7-066c6ac1cfcc.jpg"
+        },
+        {
+          "height": 1400,
+          "width": 1400,
+          "aspectRatio": "1:1",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/290a7646-a000-4c9c-a6a5-471ef63280a4.jpg"
+        },
+        {
+          "height": 720,
+          "width": 1280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/3b238d5e-9df9-4a41-a37e-51c058aa7a96.jpg"
+        },
+        {
+          "height": 480,
+          "width": 850,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/348e0fc3-37d6-44f1-bfed-0e4aaefedf2b.jpg"
+        },
+        {
+          "height": 157,
+          "width": 280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/73a30256-e91b-47bb-8bc7-f8065c9da78c.jpg"
+        }
+      ],
+      "embedPath": "/videos/embed/s3zLHRFn76KcDmuTsoDUXB",
+      "createdAt": "2021-08-11T14:27:30.522Z",
+      "updatedAt": "2026-10-25T00:40:22.505Z",
+      "publishedAt": "2021-08-11T17:16:00.348Z",
+      "originallyPublishedAt": "2018-10-17T22:00:00.000Z",
+      "isLive": false,
+      "account": {
+        "id": 3,
+        "displayName": "Framasoft",
+        "name": "framasoft",
+        "url": "https://framatube.org/accounts/framasoft",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "createdAt": "2026-03-11T12:30:47.185Z",
+            "updatedAt": "2026-03-11T12:30:47.185Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "createdAt": "2026-03-11T12:30:47.231Z",
+            "updatedAt": "2026-03-11T12:30:47.231Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "createdAt": "2026-03-11T12:30:47.282Z",
+            "updatedAt": "2026-03-11T12:30:47.282Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "createdAt": "2026-03-11T12:30:47.603Z",
+            "updatedAt": "2026-03-11T12:30:47.603Z"
+          }
+        ]
+      },
+      "channel": {
+        "id": 2215,
+        "name": "joinpeertube",
+        "displayName": "A propos de PeerTube",
+        "url": "https://framatube.org/video-channels/joinpeertube",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "createdAt": "2026-03-11T12:36:29.341Z",
+            "updatedAt": "2026-03-11T12:36:29.341Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "createdAt": "2026-03-11T12:36:29.360Z",
+            "updatedAt": "2026-03-11T12:36:29.360Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "createdAt": "2026-03-11T12:36:29.408Z",
+            "updatedAt": "2026-03-11T12:36:29.408Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "createdAt": "2026-03-11T12:36:29.464Z",
+            "updatedAt": "2026-03-11T12:36:29.464Z"
+          }
+        ]
+      },
+      "comments": 0
+    },
+    {
+      "id": 19362,
+      "uuid": "8519184e-b0c0-45f9-a005-4baddcd41f88",
+      "shortUUID": "hrg4zLAhJZ371toka596nS",
+      "url": "https://framatube.org/videos/watch/8519184e-b0c0-45f9-a005-4baddcd41f88",
+      "name": "Les coulisses de PeerTube (PeerTube, backstage)",
+      "category": {
+        "id": 13,
+        "label": "Education"
+      },
+      "licence": {
+        "id": 7,
+        "label": "Public Domain Dedication"
+      },
+      "language": {
+        "id": "fr",
+        "label": "French"
+      },
+      "privacy": {
+        "id": 1,
+        "label": "Public"
+      },
+      "nsfw": false,
+      "nsfwFlags": 0,
+      "nsfwSummary": null,
+      "truncatedDescription": "*(English subtitles available, EN description below)*\r\n\r\n**Learn more : https://framablog.org/2021/01/07/peertube-v3-its",
+      "description": "*(English subtitles available, EN description below)*\r\n\r\n**Learn more : https://framablog.org/2021/01/07/peertube-v3-its",
+      "isLocal": true,
+      "duration": 909,
+      "aspectRatio": null,
+      "views": 6416,
+      "viewers": 0,
+      "downloads": 5299,
+      "likes": 5,
+      "dislikes": 0,
+      "thumbnailPath": "/lazy-static/thumbnails/d02adaf4-adcd-475d-93dd-e8bb460a494a.jpg",
+      "previewPath": "/lazy-static/thumbnails/9264fcdb-cee4-469a-8a46-ed5aa1d7e800.jpg",
+      "thumbnails": [
+        {
+          "height": 1080,
+          "width": 1920,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/9264fcdb-cee4-469a-8a46-ed5aa1d7e800.jpg"
+        },
+        {
+          "height": 1400,
+          "width": 1400,
+          "aspectRatio": "1:1",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/4b5d3564-27de-44f2-ba18-8493463f295c.jpg"
+        },
+        {
+          "height": 720,
+          "width": 1280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/9a691379-dd7e-41e4-bd55-d0249bddbb2b.jpg"
+        },
+        {
+          "height": 480,
+          "width": 850,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/d605867c-5f34-4cce-9d22-e5e5dfc29d79.jpg"
+        },
+        {
+          "height": 157,
+          "width": 280,
+          "aspectRatio": "16:9",
+          "fileUrl": "https://framatube.org/lazy-static/thumbnails/d02adaf4-adcd-475d-93dd-e8bb460a494a.jpg"
+        }
+      ],
+      "embedPath": "/videos/embed/hrg4zLAhJZ371toka596nS",
+      "createdAt": "2021-01-06T07:37:52.121Z",
+      "updatedAt": "2026-10-25T00:40:22.280Z",
+      "publishedAt": "2021-01-06T07:38:21.636Z",
+      "originallyPublishedAt": "2021-01-07T08:21:20.000Z",
+      "isLive": false,
+      "account": {
+        "id": 3,
+        "displayName": "Framasoft",
+        "name": "framasoft",
+        "url": "https://framatube.org/accounts/framasoft",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/5bcda318-5274-4682-9220-307f378f4382.png",
+            "createdAt": "2026-03-11T12:30:47.185Z",
+            "updatedAt": "2026-03-11T12:30:47.185Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/3673fac2-f1d4-4d2d-b898-a99c4fbd70d0.png",
+            "createdAt": "2026-03-11T12:30:47.231Z",
+            "updatedAt": "2026-03-11T12:30:47.231Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/18f94f9f-b042-4e96-a9ca-14bbdf96cf9c.png",
+            "createdAt": "2026-03-11T12:30:47.282Z",
+            "updatedAt": "2026-03-11T12:30:47.282Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/9a70edb0-3eed-4f84-8d72-e5e6632b513a.png",
+            "createdAt": "2026-03-11T12:30:47.603Z",
+            "updatedAt": "2026-03-11T12:30:47.603Z"
+          }
+        ]
+      },
+      "channel": {
+        "id": 2215,
+        "name": "joinpeertube",
+        "displayName": "A propos de PeerTube",
+        "url": "https://framatube.org/video-channels/joinpeertube",
+        "host": "framatube.org",
+        "avatars": [
+          {
+            "width": 1500,
+            "path": "/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/0e469ff4-7f66-4049-8d1f-bbba685e687c.png",
+            "createdAt": "2026-03-11T12:36:29.341Z",
+            "updatedAt": "2026-03-11T12:36:29.341Z"
+          },
+          {
+            "width": 600,
+            "path": "/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bd34fd62-ec54-497e-9ca5-1e9338863e36.png",
+            "createdAt": "2026-03-11T12:36:29.360Z",
+            "updatedAt": "2026-03-11T12:36:29.360Z"
+          },
+          {
+            "width": 120,
+            "path": "/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/161034bf-39d8-4977-bdb7-0f6441d95f0f.png",
+            "createdAt": "2026-03-11T12:36:29.408Z",
+            "updatedAt": "2026-03-11T12:36:29.408Z"
+          },
+          {
+            "width": 48,
+            "path": "/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "fileUrl": "https://framatube.org/lazy-static/avatars/bbb06ded-172a-41b8-b409-f3968fcf8522.png",
+            "createdAt": "2026-03-11T12:36:29.464Z",
+            "updatedAt": "2026-03-11T12:36:29.464Z"
+          }
+        ]
+      },
+      "comments": 8
+    }
+  ]
+}

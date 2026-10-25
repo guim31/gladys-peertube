@@ -1,0 +1,32 @@
+{
+  "url": "http://peertube.example.org:9000/video-channels/gladys_test",
+  "name": "gladys_test",
+  "host": "peertube.example.org:9000",
+  "avatars": [],
+  "id": 3,
+  "hostRedundancyAllowed": false,
+  "followingCount": 0,
+  "followersCount": 0,
+  "createdAt": "2026-10-25T00:50:58.490Z",
+  "banners": [],
+  "displayName": "Gladys Test",
+  "description": null,
+  "support": null,
+  "isLocal": true,
+  "updatedAt": "2026-10-25T00:51:14.781Z",
+  "ownerAccount": {
+    "url": "http://peertube.example.org:9000/accounts/root",
+    "name": "root",
+    "host": "peertube.example.org:9000",
+    "avatars": [],
+    "id": 2,
+    "hostRedundancyAllowed": false,
+    "followingCount": 0,
+    "followersCount": 0,
+    "createdAt": "2026-10-25T00:49:10.528Z",
+    "displayName": "root",
+    "description": null,
+    "updatedAt": "2026-10-25T00:49:10.531Z",
+    "userId": 1
+  }
+}

@@ -31,16 +31,21 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
-src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+index.js                          SDK wiring only (src/app.js does the registering)
+src/app.js                        every SDK handler, on the hub; the tests drive the same wiring
+src/hub.js                        timer, readings, scene events, states, transports, reports
+src/devices.js                    the devices (instance, channels, account) and their features
+src/peertube/client.js            REST API client (public reads, OAuth password grant)
+src/peertube/http.js              the one network function (node:http/https), the test seam
+src/scenes.js                     scene action `read_latest`
+src/widgets.js                    widget `latest_videos` and its thumbnails (onWidgetGetImage)
+src/texts.js                      every text sent to Gladys, in en/fr/de/es
+src/config.js                     DEFAULT_CONFIG (mirrors the manifest) + parsing of address and handles
+src/store.js                      what was seen, under /data (atomic writes)
+gladys-assistant-integration.json manifest
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (same sections)
+test/                             node --test, SDK fake Gladys + in-memory PeerTube (test/helpers)
+test/fixtures/peertube/           real answers: v7-* (PeerTube 7.3.0 in Docker), v8-* (framatube.org 8.3.1)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +75,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German ("du") and Spanish
+  ("usted"): action messages, widget, feature names, manifest texts, and the
+  four `docs/*.md`, kept in sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +239,36 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## PeerTube (API, pièges vérifiés le 25/10/2026)
+
+Vérifié contre PeerTube 7.3.0 (image `chocobozzz/peertube:production-bookworm`, PostgreSQL, Redis, direct RTMP
+par ffmpeg) et framatube.org (8.3.1). Rien de ce qui sert ici n'a changé entre les deux.
+
+- **Lecture publique** : `/api/v1/config` (`serverVersion`, `instance.name`), `/api/v1/server/stats` (recalculé par
+  PeerTube toutes les quelques minutes : les compteurs avancent par paliers), `/api/v1/video-channels/<handle>`
+  (`followersCount` ; `withStats` ne donne **pas** de vues totales en 8.3.1), `…/videos?sort=-publishedAt&isLive=`.
+  `total` de la liste = nombre de vidéos.
+- **Directs** : `isLive=true` ne liste que les directs **à l'antenne** (un direct permanent en attente ou un direct
+  fini n'est pas public). La fin d'un direct = il disparaît de cette liste ; RTMP coupé, il disparaît en moins de
+  2 s. Le `publishedAt` d'un direct permanent est sa date de création : la durée se compte depuis la première
+  lecture qui le voit. Un direct n'apparaît pas dans `isLive=false` : il ne déclenche pas `new_video`.
+- **Handles** : `nom` pour une chaîne de l'instance, `nom@hôte` pour une autre (l'instance doit la connaître). Les noms
+  contiennent `.`, `-`, `_`, voire un UUID. Le `host` renvoyé garde le port (`peertube.example.org:9000`) : l'id de
+  plateforme remplace `:` par `-`.
+- **Piège OAuth** : `/api/v1/oauth-clients/local` répond **403** si la requête n'est pas adressée au nom d'hôte
+  configuré de PeerTube (cas d'une instance locale jointe par son IP). Le client relit l'hôte dans
+  `/.well-known/nodeinfo` et renvoie la requête avec l'en-tête `Host`. `/users/token` accepte ensuite l'IP.
+  Jeton : 24 h, rafraîchissement 14 jours ; en mémoire seulement.
+- Connexion refusée : 400 `invalid_grant` ; double authentification : 401 + en-tête `x-peertube-otp: required`.
+  La connexion est limitée (15 par 5 min, `x-ratelimit-*`) : après un refus, pas de nouvel essai avant 30 min.
+- Limite d'API par IP (instances publiques) : un 429 arrête la lecture en cours (`rate_limited`).
+- Miniatures : `thumbnailPath` relatif (`/lazy-static/thumbnails/…jpg`, 9 à 13 Ko), servies au widget par
+  `onWidgetGetImage` ; la clé dérive du chemin, qui change avec l'image.
+- Liens du widget : https seulement (le cœur jette le reste) ; une instance locale en http n'a pas de lien.
+- Limite d'API par défaut : 50 requêtes / 10 s par IP. Les pages des chaînes (abonnés) sont lues 5 au plus par
+  lecture, les plus anciennes d'abord : sinon, au redémarrage ou tous les quarts d'heure, 20 chaînes font ~60
+  requêtes d'un coup. Un 429 n'est pas une panne : les appareils restent tels quels.
+- Une reconfiguration pendant une lecture (`refresh` attend la lecture en cours, mais `reconfigure` a déjà remplacé
+  `saved`, `instance` et le client) : la lecture écrit dans les objets du début, et ne publie rien si l'instance a
+  changé. Testé dans `test/hub.test.js` (« Review regressions »).

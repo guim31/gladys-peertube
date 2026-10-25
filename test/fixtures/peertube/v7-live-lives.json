@@ -1,0 +1,65 @@
+{
+  "total": 1,
+  "data": [
+    {
+      "id": 3,
+      "uuid": "4884413d-a085-4def-9c41-f2aa75f15e94",
+      "shortUUID": "9XntUwegtY3etUKhB4GG63",
+      "url": "http://peertube.example.org:9000/videos/watch/4884413d-a085-4def-9c41-f2aa75f15e94",
+      "name": "Gladys",
+      "category": {
+        "id": null,
+        "label": "Unknown"
+      },
+      "licence": {
+        "id": null,
+        "label": "Unknown"
+      },
+      "language": {
+        "id": null,
+        "label": "Unknown"
+      },
+      "privacy": {
+        "id": 1,
+        "label": "Public"
+      },
+      "nsfw": false,
+      "nsfwFlags": 0,
+      "nsfwSummary": null,
+      "truncatedDescription": null,
+      "description": null,
+      "isLocal": true,
+      "duration": 0,
+      "aspectRatio": 1.7778,
+      "views": 0,
+      "viewers": 0,
+      "likes": 0,
+      "dislikes": 0,
+      "thumbnailPath": "/lazy-static/thumbnails/7236025f-4bd2-4e34-938c-3354d48651e4.jpg",
+      "previewPath": "/lazy-static/previews/d3d243fa-681f-4038-b58e-34dfc4408bf1.jpg",
+      "embedPath": "/videos/embed/9XntUwegtY3etUKhB4GG63",
+      "createdAt": "2026-10-25T00:51:14.740Z",
+      "updatedAt": "2026-10-25T00:51:58.297Z",
+      "publishedAt": "2026-10-25T00:51:58.297Z",
+      "originallyPublishedAt": null,
+      "isLive": true,
+      "account": {
+        "id": 2,
+        "displayName": "root",
+        "name": "root",
+        "url": "http://peertube.example.org:9000/accounts/root",
+        "host": "peertube.example.org:9000",
+        "avatars": []
+      },
+      "channel": {
+        "id": 3,
+        "name": "gladys_test",
+        "displayName": "Gladys Test",
+        "url": "http://peertube.example.org:9000/video-channels/gladys_test",
+        "host": "peertube.example.org:9000",
+        "avatars": []
+      },
+      "comments": 0
+    }
+  ]
+}

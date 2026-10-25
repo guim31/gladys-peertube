@@ -1,177 +1,695 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "PeerTube",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "PeerTube in Gladys: new videos and lives of your channels, instance figures, notifications.",
+    "fr": "PeerTube dans Gladys : nouvelles vidéos et directs de vos chaînes, chiffres de l'instance.",
+    "de": "PeerTube in Gladys: neue Videos und Livestreams deiner Kanäle, Zahlen der Instanz.",
+    "es": "PeerTube en Gladys: nuevos vídeos y directos de sus canales, cifras de la instancia."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-peertube:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-peertube/main/cover.png",
+  "categories": ["multimedia"],
   "transports": ["local", "cloud"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your PeerTube",
+        "fr": "Votre PeerTube",
+        "de": "Dein PeerTube",
+        "es": "Su PeerTube"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Enter the address of a PeerTube instance (yours, or a public one) and the channels to follow. Then add the devices from the Discover tab. The account is optional.",
+        "fr": "Saisissez l'adresse d'une instance PeerTube (la vôtre, ou une instance publique) et les chaînes à suivre. Ajoutez ensuite les appareils depuis l'onglet Découverte. Le compte est facultatif.",
+        "de": "Gib die Adresse einer PeerTube-Instanz (deine oder eine öffentliche) und die zu folgenden Kanäle ein. Lege dann die Geräte im Tab „Entdecken“ an. Das Konto ist optional.",
+        "es": "Introduzca la dirección de una instancia PeerTube (la suya o una pública) y los canales que desea seguir. Después añada los dispositivos desde la pestaña Descubrir. La cuenta es opcional."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-peertube/blob/main/docs/en.md",
+          "label": {
+            "en": "Setup guide",
+            "fr": "Guide d'installation",
+            "de": "Einrichtungsanleitung",
+            "es": "Guía de instalación"
+          }
+        },
+        {
+          "url": "https://joinpeertube.org/",
+          "label": {
+            "en": "About PeerTube",
+            "fr": "À propos de PeerTube",
+            "de": "Über PeerTube",
+            "es": "Acerca de PeerTube"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "url",
+      "type": "string",
+      "label": {
+        "en": "Instance address",
+        "fr": "Adresse de l'instance",
+        "de": "Adresse der Instanz",
+        "es": "Dirección de la instancia"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "The address of the PeerTube site, as in your browser (https://… for a public instance, http://IP:9000 on your network).",
+        "fr": "L'adresse du site PeerTube, comme dans votre navigateur (https://… pour une instance publique, http://IP:9000 sur votre réseau).",
+        "de": "Die Adresse der PeerTube-Seite, wie im Browser (https://… für eine öffentliche Instanz, http://IP:9000 in deinem Netzwerk).",
+        "es": "La dirección del sitio PeerTube, como en su navegador (https://… para una instancia pública, http://IP:9000 en su red)."
+      },
+      "placeholder": {
+        "en": "e.g. https://framatube.org",
+        "fr": "ex. https://framatube.org",
+        "de": "z. B. https://framatube.org",
+        "es": "p. ej. https://framatube.org"
+      },
+      "required": true
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "channels",
+      "type": "string",
+      "label": {
+        "en": "Channels to follow",
+        "fr": "Chaînes à suivre",
+        "de": "Zu folgende Kanäle",
+        "es": "Canales que seguir"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "description": {
+        "en": "Handles of the channels, separated by commas (20 at most): name for a channel of the instance, name@host for another one, or the address of its page.",
+        "fr": "Identifiants des chaînes, séparés par des virgules (20 au plus) : nom pour une chaîne de l'instance, nom@hôte pour une autre, ou l'adresse de sa page.",
+        "de": "Kennungen der Kanäle, durch Kommas getrennt (höchstens 20): name für einen Kanal der Instanz, name@host für einen anderen, oder die Adresse seiner Seite.",
+        "es": "Identificadores de los canales, separados por comas (20 como máximo): nombre para un canal de la instancia, nombre@host para otro, o la dirección de su página."
+      },
+      "placeholder": {
+        "en": "e.g. joinpeertube, blender_channel@video.blender.org",
+        "fr": "ex. joinpeertube, blender_channel@video.blender.org",
+        "de": "z. B. joinpeertube, blender_channel@video.blender.org",
+        "es": "p. ej. joinpeertube, blender_channel@video.blender.org"
+      },
       "required": false,
-      "default": "celsius",
+      "default": ""
+    },
+    {
+      "key": "account",
+      "type": "section",
+      "label": {
+        "en": "Account (optional)",
+        "fr": "Compte (facultatif)",
+        "de": "Konto (optional)",
+        "es": "Cuenta (opcional)"
+      },
+      "description": {
+        "en": "Your account on this instance adds a device with your unread notifications and the followers of your channels. Leave empty to read the public pages only.",
+        "fr": "Votre compte sur cette instance ajoute un appareil avec vos notifications non lues et les abonnés de vos chaînes. Laissez vide pour ne lire que les pages publiques.",
+        "de": "Dein Konto auf dieser Instanz ergänzt ein Gerät mit deinen ungelesenen Benachrichtigungen und den Abonnenten deiner Kanäle. Leer lassen, um nur die öffentlichen Seiten zu lesen.",
+        "es": "Su cuenta en esta instancia añade un dispositivo con sus notificaciones no leídas y los suscriptores de sus canales. Déjelo vacío para leer solo las páginas públicas."
+      }
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "User name",
+        "fr": "Identifiant",
+        "de": "Benutzername",
+        "es": "Usuario"
+      },
+      "description": {
+        "en": "The user name (or email) you log in with. Accounts with two-factor authentication or an external login (OpenID, SAML) are not supported.",
+        "fr": "L'identifiant (ou l'e-mail) de connexion. Les comptes à double authentification ou à connexion externe (OpenID, SAML) ne sont pas pris en charge.",
+        "de": "Der Benutzername (oder die E-Mail) zum Anmelden. Konten mit Zwei-Faktor-Authentifizierung oder externer Anmeldung (OpenID, SAML) werden nicht unterstützt.",
+        "es": "El usuario (o el correo) con el que inicia sesión. Las cuentas con autenticación en dos pasos o inicio de sesión externo (OpenID, SAML) no son compatibles."
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe",
+        "de": "Passwort",
+        "es": "Contraseña"
+      },
+      "description": {
+        "en": "The password of this account. It is only sent to the instance, to get a session token.",
+        "fr": "Le mot de passe de ce compte. Il n'est envoyé qu'à l'instance, pour obtenir un jeton de session.",
+        "de": "Das Passwort dieses Kontos. Es wird nur an die Instanz gesendet, um ein Sitzungstoken zu erhalten.",
+        "es": "La contraseña de esta cuenta. Solo se envía a la instancia, para obtener un token de sesión."
+      },
+      "required": false
+    },
+    {
+      "key": "options",
+      "type": "section",
+      "label": {
+        "en": "Options",
+        "fr": "Options",
+        "de": "Optionen",
+        "es": "Opciones"
+      }
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "How often PeerTube is read: two light requests per channel each time. A live is seen at most this late.",
+        "fr": "À quelle fréquence PeerTube est lu : deux requêtes légères par chaîne à chaque fois. Un direct est vu au plus avec ce retard.",
+        "de": "Wie oft PeerTube gelesen wird: jedes Mal zwei leichte Anfragen pro Kanal. Ein Livestream wird höchstens so spät erkannt.",
+        "es": "Con qué frecuencia se lee PeerTube: dos peticiones ligeras por canal cada vez. Un directo se detecta como mucho con este retraso."
+      },
+      "required": false,
+      "default": "120",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "120",
+          "label": {
+            "en": "2 minutes",
+            "fr": "2 minutes",
+            "de": "2 Minuten",
+            "es": "2 minutos"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
+        },
+        {
+          "value": "600",
+          "label": {
+            "en": "10 minutes",
+            "fr": "10 minutes",
+            "de": "10 Minuten",
+            "es": "10 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Language of the feature names (set when the device is added), of the dates and of the scene results.",
+        "fr": "Langue des noms des fonctionnalités (fixés à l'ajout de l'appareil), des dates et des résultats de scène.",
+        "de": "Sprache der Funktionsnamen (beim Anlegen des Geräts festgelegt), der Daten und der Szenen-Ergebnisse.",
+        "es": "Idioma de los nombres de las funciones (fijados al añadir el dispositivo), de las fechas y de los resultados de escena."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "new_video",
+      "label": {
+        "en": "New PeerTube video",
+        "fr": "Nouvelle vidéo PeerTube",
+        "de": "Neues PeerTube-Video",
+        "es": "Nuevo vídeo de PeerTube"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A followed channel has published a new video.",
+        "fr": "Une chaîne suivie a publié une nouvelle vidéo.",
+        "de": "Ein gefolgter Kanal hat ein neues Video veröffentlicht.",
+        "es": "Un canal seguido ha publicado un nuevo vídeo."
       },
       "fields": [
         {
-          "key": "device",
+          "key": "channel",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
+          "label": {
+            "en": "Channel (empty: any)",
+            "fr": "Chaîne (vide : n'importe laquelle)",
+            "de": "Kanal (leer: beliebig)",
+            "es": "Canal (vacío: cualquiera)"
+          },
+          "required": false
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "channel_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Kanal",
+            "es": "Canal"
+          }
+        },
+        {
+          "key": "handle",
+          "type": "string",
+          "label": {
+            "en": "Channel handle (name@host)",
+            "fr": "Identifiant de la chaîne (nom@hôte)",
+            "de": "Kanalkennung (name@host)",
+            "es": "Identificador del canal (nombre@host)"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Video title",
+            "fr": "Titre de la vidéo",
+            "de": "Titel des Videos",
+            "es": "Título del vídeo"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Address of the video",
+            "fr": "Adresse de la vidéo",
+            "de": "Adresse des Videos",
+            "es": "Dirección del vídeo"
+          }
+        },
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": {
+            "en": "Duration (minutes)",
+            "fr": "Durée (minutes)",
+            "de": "Dauer (Minuten)",
+            "es": "Duración (minutos)"
+          }
+        },
+        {
+          "key": "published_at",
+          "type": "string",
+          "label": {
+            "en": "Publication date (ISO 8601)",
+            "fr": "Date de publication (ISO 8601)",
+            "de": "Veröffentlichungsdatum (ISO 8601)",
+            "es": "Fecha de publicación (ISO 8601)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "live_started",
+      "label": {
+        "en": "PeerTube live started",
+        "fr": "Direct PeerTube commencé",
+        "de": "PeerTube-Livestream gestartet",
+        "es": "Directo de PeerTube iniciado"
+      },
+      "description": {
+        "en": "A followed channel is live: its stream is on air.",
+        "fr": "Une chaîne suivie est en direct : sa diffusion a commencé.",
+        "de": "Ein gefolgter Kanal ist live: Sein Stream ist auf Sendung.",
+        "es": "Un canal seguido está en directo: su emisión ha empezado."
+      },
+      "fields": [
+        {
+          "key": "channel",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Channel (empty: any)",
+            "fr": "Chaîne (vide : n'importe laquelle)",
+            "de": "Kanal (leer: beliebig)",
+            "es": "Canal (vacío: cualquiera)"
+          },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "channel_name",
+          "type": "string",
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Kanal",
+            "es": "Canal"
+          }
+        },
+        {
+          "key": "handle",
+          "type": "string",
+          "label": {
+            "en": "Channel handle (name@host)",
+            "fr": "Identifiant de la chaîne (nom@hôte)",
+            "de": "Kanalkennung (name@host)",
+            "es": "Identificador del canal (nombre@host)"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Live title",
+            "fr": "Titre du direct",
+            "de": "Titel des Livestreams",
+            "es": "Título del directo"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Address of the video",
+            "fr": "Adresse de la vidéo",
+            "de": "Adresse des Videos",
+            "es": "Dirección del vídeo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "live_ended",
+      "label": {
+        "en": "PeerTube live ended",
+        "fr": "Direct PeerTube terminé",
+        "de": "PeerTube-Livestream beendet",
+        "es": "Directo de PeerTube terminado"
+      },
+      "description": {
+        "en": "A live of a followed channel is over, with its length and its peak of viewers.",
+        "fr": "Un direct d'une chaîne suivie est fini, avec sa durée et son pic de spectateurs.",
+        "de": "Ein Livestream eines gefolgten Kanals ist vorbei, mit Dauer und Zuschauerspitze.",
+        "es": "Un directo de un canal seguido ha terminado, con su duración y su pico de espectadores."
+      },
+      "fields": [
+        {
+          "key": "channel",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Channel (empty: any)",
+            "fr": "Chaîne (vide : n'importe laquelle)",
+            "de": "Kanal (leer: beliebig)",
+            "es": "Canal (vacío: cualquiera)"
+          },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "channel_name",
+          "type": "string",
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Kanal",
+            "es": "Canal"
+          }
+        },
+        {
+          "key": "handle",
+          "type": "string",
+          "label": {
+            "en": "Channel handle (name@host)",
+            "fr": "Identifiant de la chaîne (nom@hôte)",
+            "de": "Kanalkennung (name@host)",
+            "es": "Identificador del canal (nombre@host)"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Live title",
+            "fr": "Titre du direct",
+            "de": "Titel des Livestreams",
+            "es": "Título del directo"
+          }
+        },
+        {
+          "key": "url",
+          "type": "string",
+          "label": {
+            "en": "Address of the video",
+            "fr": "Adresse de la vidéo",
+            "de": "Adresse des Videos",
+            "es": "Dirección del vídeo"
+          }
+        },
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": {
+            "en": "Duration (minutes)",
+            "fr": "Durée (minutes)",
+            "de": "Dauer (Minuten)",
+            "es": "Duración (minutos)"
+          }
+        },
+        {
+          "key": "peak_viewers",
+          "type": "number",
+          "label": {
+            "en": "Peak viewers",
+            "fr": "Pic de spectateurs",
+            "de": "Zuschauerspitze",
+            "es": "Pico de espectadores"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "read_latest",
+      "label": {
+        "en": "Read the latest PeerTube videos",
+        "fr": "Lire les dernières vidéos PeerTube",
+        "de": "Neueste PeerTube-Videos lesen",
+        "es": "Leer los últimos vídeos de PeerTube"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Reads PeerTube now for the next actions: lives on air, latest videos, and a ready-made sentence.",
+        "fr": "Lit PeerTube maintenant pour les actions suivantes : directs en cours, dernières vidéos, et une phrase toute prête.",
+        "de": "Liest PeerTube jetzt für die nächsten Aktionen: laufende Livestreams, neueste Videos und einen fertigen Satz.",
+        "es": "Lee PeerTube ahora para las siguientes acciones: directos en emisión, últimos vídeos y una frase lista."
+      },
+      "timeout_seconds": 60,
       "fields": [
         {
-          "key": "device",
+          "key": "channel",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "label": {
+            "en": "Channel (empty: any)",
+            "fr": "Chaîne (vide : n'importe laquelle)",
+            "de": "Kanal (leer: beliebig)",
+            "es": "Canal (vacío: cualquiera)"
+          },
+          "required": false
+        },
+        {
+          "key": "count",
+          "type": "select",
+          "label": {
+            "en": "Videos named in the sentence",
+            "fr": "Vidéos citées dans la phrase",
+            "de": "Im Satz genannte Videos",
+            "es": "Vídeos citados en la frase"
+          },
+          "required": false,
+          "default": "3",
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1",
+                "fr": "1",
+                "de": "1",
+                "es": "1"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3",
+                "fr": "3",
+                "de": "3",
+                "es": "3"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "5",
+                "fr": "5",
+                "de": "5",
+                "es": "5"
+              }
+            }
+          ]
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Sentence",
+            "fr": "Phrase",
+            "de": "Satz",
+            "es": "Frase"
+          }
+        },
+        {
+          "key": "live",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "A live is on air",
+            "fr": "Un direct est en cours",
+            "de": "Ein Livestream läuft",
+            "es": "Hay un directo en emisión"
+          }
+        },
+        {
+          "key": "live_title",
+          "type": "string",
+          "label": {
+            "en": "Title of the live",
+            "fr": "Titre du direct",
+            "de": "Titel des Livestreams",
+            "es": "Título del directo"
+          }
+        },
+        {
+          "key": "last_title",
+          "type": "string",
+          "label": {
+            "en": "Title of the last video",
+            "fr": "Titre de la dernière vidéo",
+            "de": "Titel des letzten Videos",
+            "es": "Título del último vídeo"
+          }
+        },
+        {
+          "key": "last_channel",
+          "type": "string",
+          "label": {
+            "en": "Channel of the last video",
+            "fr": "Chaîne de la dernière vidéo",
+            "de": "Kanal des letzten Videos",
+            "es": "Canal del último vídeo"
+          }
+        },
+        {
+          "key": "last_url",
+          "type": "string",
+          "label": {
+            "en": "Address of the last video",
+            "fr": "Adresse de la dernière vidéo",
+            "de": "Adresse des letzten Videos",
+            "es": "Dirección del último vídeo"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "latest_videos",
+      "label": {
+        "en": "PeerTube videos",
+        "fr": "Vidéos PeerTube",
+        "de": "PeerTube-Videos",
+        "es": "Vídeos de PeerTube"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Lives on air and the latest videos of the followed channels, with their thumbnails.",
+        "fr": "Directs en cours et dernières vidéos des chaînes suivies, avec leurs miniatures.",
+        "de": "Laufende Livestreams und neueste Videos der gefolgten Kanäle, mit Vorschaubildern.",
+        "es": "Directos en emisión y últimos vídeos de los canales seguidos, con sus miniaturas."
+      },
+      "icon": "film"
     }
   ]
 }
