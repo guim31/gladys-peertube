@@ -105,3 +105,18 @@ test('the messages: no address, no channel, PeerTube down', async (t) => {
   assert.equal(status.items[0].value, 'Sin conexión');
   assert.match(text.text, /PeerTube no responde/);
 });
+
+test('a thumbnail of the previous run is still served after a restart', async (t) => {
+  const first = await createWorld();
+  const [grid] = await get(first);
+  await first.app.stop();
+  const key = grid.items[0].image;
+  const { getImage } = await import('../src/widgets.js');
+  const second = await world(t, { dataDir: first.dataDir });
+  // A fresh process knows no key: the content comes from the store.
+  const image = await getImage(
+    { ...second.hub, recent: () => second.hub.recent(), client: second.hub.client },
+    key,
+  );
+  assert.ok(image.length > 0);
+});

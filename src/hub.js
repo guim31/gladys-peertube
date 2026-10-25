@@ -62,6 +62,8 @@ export const HUB_TIMINGS = {
   detailMs: 15 * 60_000,
   // After a refused login, the next try waits this long (login rate limit).
   loginRetryMs: 30 * 60_000,
+  // At most this many channel pages (followers) per reading.
+  maxDetailsPerRead: 5,
   // At most this many new videos announced per channel and per reading.
   maxEventsPerRead: 5,
   // Republish an unchanged value this often (Gladys flags a value older than 48 h).
@@ -128,6 +130,7 @@ export class PeertubeHub {
     this.error = null;
     /** Error kind per channel handle (not found, rate limited…). */
     this.channelErrors = new Map();
+    this.rateLimited = false;
     this.account = this.emptyAccount();
     this.devicesKey = null;
     /** Last value published per feature external id: { value, at }. */
@@ -252,6 +255,8 @@ export class PeertubeHub {
         : null;
       this.host = config.url ? new URL(config.url).host.toLowerCase() : null;
       this.error = null;
+      this.rateLimited = false;
+      this.channelErrors.clear();
       this.instance = this.emptyInstance();
       this.account = this.emptyAccount();
       if (config.url && this.saved.url !== config.url) {
@@ -308,7 +313,7 @@ export class PeertubeHub {
   resolvedChannels() {
     return this.config.channels
       .map((handle) => ({ handle, entry: this.saved.channels[handle] }))
-      .filter(({ entry }) => entry?.id);
+      .filter(({ entry }) => entry?.id && !entry.duplicate);
   }
 
   instanceIds() {
@@ -402,36 +407,40 @@ export class PeertubeHub {
       await this.publishConnectionStatus();
       return;
     }
+    // A reconfiguration during the reading replaces these: the reading then
+    // writes into the objects it started with, never into the new ones.
     const client = this.client;
+    const saved = this.saved;
     const before = this.widgetView();
     const events = [];
     try {
       await this.readInstance(client);
-      if (client !== this.client) {
-        return; // reconfigured meanwhile
+      await this.readChannels(client, saved, events);
+      await this.readAccount(client, saved);
+      if (client === this.client) {
+        this.resolved('rate-limited', `PeerTube ${this.config.url}: requests accepted again`);
+        this.rateLimited = false;
       }
-      await this.readChannels(client, events);
-      if (client !== this.client) {
-        return;
-      }
-      await this.readAccount(client);
     } catch (err) {
       if (!err.kind) {
         throw err;
       }
-      if (client !== this.client) {
-        return;
+      if (client === this.client) {
+        this.applyFailure(err);
       }
-      this.applyFailure(err);
+    }
+    if (saved !== this.saved) {
+      return; // another instance meanwhile: what was read is not its news
     }
     // On disk before the events: a crash in between announces nothing twice.
-    this.store.save(this.saved);
+    this.store.save(saved);
     await this.store.flush();
-    if (client !== this.client) {
-      return;
-    }
+    // Same instance (only the account may have changed): the events stand.
     for (const [key, data] of events) {
       await this.fire(key, data);
+    }
+    if (client !== this.client) {
+      return; // the reading of the new configuration publishes
     }
     await this.publishDevices();
     await this.publishStates();
@@ -443,32 +452,48 @@ export class PeertubeHub {
   }
 
   async readInstance(client) {
-    if (!this.instance.version) {
-      const { version, name } = await client.config();
-      this.instance.version = version;
-      this.instance.name = name;
+    let { version, name } = this.instance;
+    if (!version) {
+      ({ version, name } = await client.config());
     }
     const stats = await client.stats();
+    if (client !== this.client) {
+      return;
+    }
     if (this.error) {
       logger.info(`PeerTube ${this.config.url}: connection restored`);
     } else if (this.instance.reachable === null) {
       logger.info(
-        `PeerTube ${this.config.url}: connected, version ${this.instance.version}, ${this.config.channels.length} channel(s) followed`,
+        `PeerTube ${this.config.url}: connected, version ${version}, ${this.config.channels.length} channel(s) followed`,
       );
     }
     this.error = null;
-    this.instance = { ...this.instance, reachable: true, stats };
+    this.instance = { ...this.instance, version, name, reachable: true, stats };
   }
 
-  async readChannels(client, events) {
+  async readChannels(client, saved, events) {
+    // The pages of the channels (followers) are spread over the readings: a
+    // burst of requests would meet the API limit of the instance (50 per 10 s
+    // by default).
+    const now = this.now();
+    const due = this.config.channels
+      .filter((handle) => {
+        const entry = saved.channels[handle];
+        return !entry?.id || now - entry.followersAt >= this.timings.detailMs;
+      })
+      .sort(
+        (a, b) => (saved.channels[a]?.followersAt ?? -1) - (saved.channels[b]?.followersAt ?? -1),
+      )
+      .slice(0, this.timings.maxDetailsPerRead);
+    const seen = new Set();
     for (const handle of this.config.channels) {
       try {
-        await this.readChannel(client, handle, events);
+        await this.readChannel(client, saved, handle, due.includes(handle), seen, events);
         if (this.channelErrors.delete(handle)) {
           this.resolved(`channel:${handle}`, `PeerTube channel ${handle}: read again`);
         }
       } catch (err) {
-        if (!err.kind || client !== this.client) {
+        if (!err.kind) {
           throw err;
         }
         if (
@@ -483,12 +508,23 @@ export class PeertubeHub {
     }
   }
 
-  async readChannel(client, handle, events) {
+  /** Still the reading of this channel (not reconfigured, not removed meanwhile)? */
+  current(saved, handle) {
+    return saved === this.saved && this.config.channels.includes(handle);
+  }
+
+  async readChannel(client, saved, handle, detail, seen, events) {
     const now = this.now();
-    let entry = this.saved.channels[handle];
-    if (!entry?.id || now - entry.followersAt >= this.timings.detailMs) {
+    let entry = saved.channels[handle];
+    if (!entry?.id && !detail) {
+      return; // resolved at a next reading, in turn
+    }
+    if (detail) {
       const channel = await client.channel(handle);
-      entry ??= {
+      if (!this.current(saved, handle)) {
+        return;
+      }
+      entry = saved.channels[handle] ?? {
         id: null,
         displayName: channel.displayName,
         followers: null,
@@ -503,13 +539,17 @@ export class PeertubeHub {
       entry.displayName = channel.displayName;
       entry.followers = channel.followers;
       entry.followersAt = now;
-      this.saved.channels[handle] = entry;
+      saved.channels[handle] = entry;
     }
-    const [{ total, videos }, { videos: lives }] = [
-      await client.videos(handle),
-      await client.videos(handle, { live: true }),
-    ];
-    if (client !== this.client) {
+    // Two handles of the same channel (`name` and its page address): one device.
+    entry.duplicate = seen.has(entry.id);
+    seen.add(entry.id);
+    if (entry.duplicate) {
+      return;
+    }
+    const { total, videos } = await client.videos(handle);
+    const { videos: lives } = await client.videos(handle, { live: true });
+    if (!this.current(saved, handle) || saved.channels[handle] !== entry) {
       return;
     }
     const firstRead = entry.window === null;
@@ -599,8 +639,8 @@ export class PeertubeHub {
     }
   }
 
-  async readAccount(client) {
-    if (!client.hasAccount) {
+  async readAccount(client, saved) {
+    if (!client.hasAccount || client !== this.client) {
       return;
     }
     const now = this.now();
@@ -608,31 +648,50 @@ export class PeertubeHub {
       return; // a refused login: no new try before retryAt
     }
     try {
-      if (!this.saved.account || now - this.account.readAt >= this.timings.detailMs) {
+      let { followers, readAt } = this.account;
+      let handle = saved.account?.handle;
+      if (!handle || now - readAt >= this.timings.detailMs) {
         const me = await client.me();
-        const handle = `${me.name}@${me.host || this.host}`.toLowerCase();
-        this.saved.account = { handle };
-        this.account.followers = me.followers;
-        this.account.readAt = now;
+        handle = `${me.name}@${me.host || this.host}`.toLowerCase();
+        followers = me.followers;
+        readAt = now;
       }
-      this.account.unread = await client.unreadNotifications();
+      const unread = await client.unreadNotifications();
+      if (client !== this.client || saved !== this.saved) {
+        return;
+      }
+      saved.account = { handle };
       if (this.account.error) {
         logger.info(`PeerTube account ${this.config.username}: connected again`);
       }
-      this.account.error = null;
+      this.account = { ...this.account, followers, readAt, unread, error: null };
       this.resolved('account');
     } catch (err) {
       if (!err.kind || [ERROR_KINDS.UNREACHABLE, ERROR_KINDS.TLS].includes(err.kind)) {
         throw err;
       }
-      const refused = [ERROR_KINDS.AUTH, ERROR_KINDS.TWO_FACTOR].includes(err.kind);
+      if (client !== this.client) {
+        return;
+      }
+      // A refused login, or the limit of the instance (15 logins per 5 minutes):
+      // no new try before a while.
+      const wait = [ERROR_KINDS.AUTH, ERROR_KINDS.TWO_FACTOR, ERROR_KINDS.RATE_LIMITED].includes(
+        err.kind,
+      );
       this.account.error = err.kind;
-      this.account.retryAt = refused ? now + this.timings.loginRetryMs : 0;
+      this.account.retryAt = wait ? now + this.timings.loginRetryMs : 0;
       this.problem('account', `PeerTube account ${this.config.username}: ${err.message}`);
     }
   }
 
   applyFailure(err) {
+    if (err.kind === ERROR_KINDS.RATE_LIMITED) {
+      // The instance answers, it limits us: the devices stay as they are, the
+      // next reading starts again.
+      this.rateLimited = true;
+      this.problem('rate-limited', `PeerTube ${this.config.url}: ${err.message}`);
+      return;
+    }
     const wasError = this.error?.kind;
     this.error = { kind: err.kind, message: err.message };
     this.instance = { ...this.instance, reachable: false };
@@ -824,6 +883,9 @@ export class PeertubeHub {
     }
     if (this.error) {
       return { connected: false, message: ERROR_TEXT[this.error.kind] };
+    }
+    if (this.rateLimited) {
+      return { connected: false, message: ERROR_TEXT[ERROR_KINDS.RATE_LIMITED] };
     }
     if (this.account.error) {
       return { connected: false, message: ERROR_TEXT[this.account.error] };

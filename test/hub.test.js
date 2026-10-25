@@ -418,3 +418,116 @@ test('without an address: no device, a clear status', async (t) => {
   assert.match(w.fake.connectionStatus.message.en, /Enter the address/);
   await assert.rejects(scene(w, 'read_latest', {}), /Enter the address/);
 });
+
+// --- Review regressions ---------------------------------------------------------
+
+/** Run `during` once, in the middle of the next reading of a channel's videos. */
+function midReading(w, during) {
+  const original = w.peertube.handle.bind(w.peertube);
+  let done = false;
+  w.peertube.handle = async (url, options) => {
+    if (!done && url.includes('/videos?')) {
+      done = true;
+      await during();
+    }
+    return original(url, options);
+  };
+}
+
+test('another instance configured during a reading gets nothing of the old one', async (t) => {
+  const w = await world(t);
+  const other = defaultPeertube(w.clock);
+  other.instanceName = 'Other';
+  w.network.servers['http://192.0.2.31:9000'] = other;
+  w.clock.advance(60_000);
+  w.publish('gladys_test', 'Old instance news');
+  midReading(w, () => {
+    // Not awaited: the reconfiguration waits for this very reading.
+    w.fake.configUpdated({ ...CONFIG, url: '192.0.2.31:9000' });
+  });
+  await w.hub.pollAll();
+  await w.hub.refresh();
+  assert.deepEqual(events(w, 'new_video'), []);
+  assert.equal(w.hub.saved.url, 'http://192.0.2.31:9000');
+  assert.deepEqual(
+    w.hub.recent().map((video) => video.title),
+    ['Gladys test clip', 'Sprite Fright', 'Older clip'],
+  );
+  // The next reading of the new instance announces nothing either.
+  await w.hub.pollAll();
+  assert.deepEqual(w.fake.sceneEvents, []);
+});
+
+test('a channel removed during a reading is not put back', async (t) => {
+  const w = await world(t);
+  midReading(w, () => {
+    w.fake.configUpdated({ ...CONFIG, channels: 'blender@video.example.net' });
+  });
+  await w.hub.pollAll();
+  await w.hub.refresh();
+  assert.deepEqual(Object.keys(w.hub.saved.channels), [REMOTE]);
+});
+
+test('an account changed during a reading keeps the events of that reading', async (t) => {
+  const w = await world(t);
+  w.clock.advance(60_000);
+  w.publish('gladys_test', 'Fresh upload');
+  midReading(w, () => {
+    w.fake.configUpdated(ACCOUNT);
+  });
+  await w.hub.pollAll();
+  await w.hub.refresh();
+  assert.equal(events(w, 'new_video').length, 1);
+});
+
+test('a 429 leaves the devices as they are; the channel pages are spread', async (t) => {
+  const handles = Array.from({ length: 12 }, (_, index) => `chan_${index}`);
+  const clock = createClock();
+  const peertube = defaultPeertube(clock);
+  for (const handle of handles) {
+    peertube.addVideo(peertube.addChannel(handle), `Video of ${handle}`, {
+      publishedAt: new Date(clock.time - 60_000).toISOString(),
+    });
+  }
+  const w = await world(t, { clock, peertube, config: { ...CONFIG, channels: handles.join(',') } });
+  const pages = () =>
+    w.peertube.requests.filter((r) => /^\/api\/v1\/video-channels\/[^/]+$/.test(r.path)).length;
+  assert.equal(pages(), HUB_TIMINGS.maxDetailsPerRead, 'five channel pages per reading');
+  await w.hub.pollAll();
+  await w.hub.pollAll();
+  assert.equal(w.fake.discoveredDevices.length, 13);
+  w.peertube.rateLimited = true;
+  const transports = w.fake.transports.length;
+  await w.hub.pollAll();
+  assert.equal(instanceState(w, 'online'), 1);
+  assert.equal(w.fake.transports.length, transports, 'no unreachable badge');
+  assert.match(w.fake.connectionStatus.message.en, /limits the requests/);
+});
+
+test('two handles of the same channel make one device and one event', async (t) => {
+  const w = await world(t, {
+    config: { ...CONFIG, channels: `gladys_test, https://${HOST}/c/gladys_test/videos` },
+  });
+  assert.equal(w.fake.discoveredDevices.length, 2, 'the instance and one channel');
+  w.clock.advance(60_000);
+  w.publish('gladys_test', 'Once');
+  await w.hub.pollAll();
+  assert.equal(events(w, 'new_video').length, 1);
+});
+
+test('a refused or limited login waits 30 minutes', async (t) => {
+  const clock = createClock();
+  const peertube = defaultPeertube(clock);
+  const original = peertube.handle.bind(peertube);
+  let tokens = 0;
+  peertube.handle = (url, options) =>
+    url.endsWith('/users/token') && ++tokens
+      ? { status: 429, headers: {}, body: Buffer.from('{}') }
+      : original(url, options);
+  const w = await world(t, { clock, peertube, config: ACCOUNT });
+  const logins = () => tokens;
+  await w.hub.pollAll();
+  await w.hub.pollAll();
+  assert.equal(logins(), 1);
+  assert.equal(w.hub.account.error, 'rate_limited');
+});

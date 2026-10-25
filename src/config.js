@@ -102,7 +102,9 @@ export function parseChannel(raw, instanceHost) {
   let text = raw.trim();
   const page = /^https?:\/\/([^/]+)\/(?:c|video-channels)\/([^/?#]+)/i.exec(text);
   if (page) {
-    text = `${decodeURIComponent(page[2])}@${page[1]}`;
+    const name = decodeURIComponent(page[2]);
+    // A remote channel seen from an instance: /c/name@host is its handle already.
+    text = name.includes('@') ? name : `${name}@${page[1]}`;
   }
   text = text.replace(/^@/, '');
   const [name, host, ...rest] = text.split('@');

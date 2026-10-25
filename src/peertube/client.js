@@ -331,7 +331,8 @@ export class PeertubeClient {
       access: data.access_token,
       refresh: typeof data.refresh_token === 'string' ? data.refresh_token : null,
       expiresAt: now + seconds(data.expires_in, 3600) * 1000,
-      refreshExpiresAt: now + seconds(data.refresh_token_expires_in, 0) * 1000,
+      // PeerTube's default: two weeks.
+      refreshExpiresAt: now + seconds(data.refresh_token_expires_in, 14 * 86_400) * 1000,
     };
     return this.token.access;
   }

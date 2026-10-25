@@ -266,3 +266,9 @@ par ffmpeg) et framatube.org (8.3.1). Rien de ce qui sert ici n'a changé entre 
 - Miniatures : `thumbnailPath` relatif (`/lazy-static/thumbnails/…jpg`, 9 à 13 Ko), servies au widget par
   `onWidgetGetImage` ; la clé dérive du chemin, qui change avec l'image.
 - Liens du widget : https seulement (le cœur jette le reste) ; une instance locale en http n'a pas de lien.
+- Limite d'API par défaut : 50 requêtes / 10 s par IP. Les pages des chaînes (abonnés) sont lues 5 au plus par
+  lecture, les plus anciennes d'abord : sinon, au redémarrage ou tous les quarts d'heure, 20 chaînes font ~60
+  requêtes d'un coup. Un 429 n'est pas une panne : les appareils restent tels quels.
+- Une reconfiguration pendant une lecture (`refresh` attend la lecture en cours, mais `reconfigure` a déjà remplacé
+  `saved`, `instance` et le client) : la lecture écrit dans les objets du début, et ne publie rien si l'instance a
+  changé. Testé dans `test/hub.test.js` (« Review regressions »).

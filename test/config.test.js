@@ -62,6 +62,13 @@ test('channel handles in every form', () => {
     'blender_channel@video.blender.org',
   );
   assert.equal(parseChannel('name@local.example:9000', 'other'), 'name@local.example:9000');
+  assert.equal(
+    parseChannel(
+      'https://my.example.org/c/blender_channel@video.blender.org/videos',
+      'my.example.org',
+    ),
+    'blender_channel@video.blender.org',
+  );
   assert.equal(parseChannel('not a handle!', host), null);
   assert.equal(parseChannel('a@b@c', host), null);
 });

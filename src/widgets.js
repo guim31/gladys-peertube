@@ -16,7 +16,7 @@
 
 import { createHash } from 'node:crypto';
 import { WIDGET_COLORS } from '@gladysassistant/integration-sdk';
-import { ERROR_KINDS, WIDGET_KEY } from './hub.js';
+import { ERROR_KINDS, WIDGET_KEY, formatDate } from './hub.js';
 import { ERROR_TEXT, pick } from './texts.js';
 
 // Posters of the grid (the core accepts 12; 6 stay readable on a tablet).
@@ -90,11 +90,11 @@ const imageCache = new Map();
 
 /** One poster of the grid. */
 export function videoItem(video, language) {
+  // In a grid the core shows a `date` in place of the subtitle: the channel
+  // stays as subtitle, the date goes to the detail panel.
   const item = { title: fit(video.title || '…', 60), subtitle: fit(video.channel || '', 60) };
-  const date = new Date(video.publishedAt);
-  if (Number.isFinite(date.getTime())) {
-    item.date = date.toISOString();
-  }
+  const date = formatDate(video.publishedAt, language);
+  item.description = [video.channel, date].filter(Boolean).join(' · ') || video.title || '…';
   if (video.thumbnailPath) {
     item.image = imageKey(video.thumbnailPath);
     imagePaths.set(item.image, video.thumbnailPath);
@@ -185,7 +185,11 @@ export async function getImage(hub, key) {
   if (imageCache.has(key)) {
     return imageCache.get(key);
   }
-  const path = imagePaths.get(key);
+  // After a restart, the core may still show a content of the previous run.
+  const path =
+    imagePaths.get(key) ??
+    hub.recent().find((video) => video.thumbnailPath && imageKey(video.thumbnailPath) === key)
+      ?.thumbnailPath;
   if (!path || !hub.client) {
     throw new Error(`Unknown image ${key}`);
   }
